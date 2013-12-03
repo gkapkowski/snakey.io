@@ -1,0 +1,60 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/client/jquery-2.0.3.min.js"></script>
+        <script src="/node_modules/underscore/underscore-min.js"></script>
+        <script src="/node_modules/backbone/backbone-min.js"></script>
+        <script src="/client/client.js"></script>
+        <style type="text/css">
+            .main {
+                width: 100%;
+            }
+
+            .board {
+                display: inline-block;
+            }
+
+            .board canvas {
+                border: 10px solid green;
+            }
+
+            .scores {  
+                width: 300px;
+                display: inline-block;
+            }
+
+            .management {  
+                width: 200px;
+                display: inline-block;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="main">
+            <div class="board">
+                <canvas id="myCanvas"></canvas> 
+            </div>
+            <div class="scores">
+                <ul></ul>
+            </div>
+            <div class="management">
+                <form action="/">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name"/>
+
+                    <label for="url">Url</label>
+                    <input type="text" id="url" name="url"/>
+
+                    <input type="submit" value="Add"/>
+                </form>
+            </div>
+        </div>
+        <script type="text/javascript">
+            var client = new Client({
+                el: $('.main'),
+                size: 10
+            });
+        </script>
+    </body>
+</html>
