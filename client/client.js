@@ -55,7 +55,7 @@ var Board = Backbone.View.extend({
         _(this).bindAll(
             'onConfig', 'onBoard',
             'drawApple', 'drawSnake',
-            'render');
+            'render', 'updateScreen');
         this.size = options.size;
 
         this.canvas = this.$('canvas')[0];
@@ -73,19 +73,24 @@ var Board = Backbone.View.extend({
     },
 
     onBoard: function (board) {
+        this.board = board;
         if (this.isFree){
             this.isFree = false;
-            this.render(board);
-            this.isFree = true;
+            this.updateScreen();
         }
     },
 
-    render: function (board) {
-        this.canvasContext.fillStyle = this.colors.empty;
-        this.canvasContext.fillRect(0, 0, board.size * this.size, board.size * this.size);
+    updateScreen: function () {
+        this.render();
+        requestAnimationFrame(this.updateScreen);
+    },
 
-        var snakes = board.state.snakes;
-        var apples = board.state.apples;
+    render: function () {
+        this.canvasContext.fillStyle = this.colors.empty;
+        this.canvasContext.fillRect(0, 0, this.board.size * this.size, this.board.size * this.size);
+
+        var snakes = this.board.state.snakes;
+        var apples = this.board.state.apples;
 
         this.drawApples(apples);
         this.drawSnakes(snakes);
