@@ -80,7 +80,6 @@ var Board = Backbone.View.extend({
         }
     },
 
-
     render: function (board) {
         this.canvasContext.fillStyle = this.colors.empty;
         this.canvasContext.fillRect(0, 0, board.size * this.size, board.size * this.size);
@@ -88,12 +87,16 @@ var Board = Backbone.View.extend({
         var snakes = board.state.snakes;
         var apples = board.state.apples;
 
-        _.each(apples, this.drawApple);
-        _.each(snakes, this.drawSnake);
+        this.drawApples(apples);
+        this.drawSnakes(snakes);
     },
 
-    drawApple: function (coords) {
+    drawApples: function (apples) {
         this.canvasContext.fillStyle = this.colors.apple;
+        _.each(apples, this.drawApple);
+    },  
+
+    drawApple: function (coords) {
         this.canvasContext.beginPath();
         this.canvasContext.arc(
             coords.x * this.size + (this.size/2), 
@@ -103,10 +106,14 @@ var Board = Backbone.View.extend({
         this.canvasContext.stroke();
     },
 
+    drawSnakes: function (snakes) {
+        _.each(snakes, this.drawSnake);
+    },
+
     drawSnake: function (snake) {
         var self = this;
+        self.canvasContext.fillStyle = self.colors.snakes[snake.uniqueId];;
         _.each(snake.body, function (coords, index) {
-            self.canvasContext.fillStyle = self.colors.snakes[snake.uniqueId];;
             self.canvasContext.beginPath();
             self.canvasContext.arc(
                 coords.x * self.size + (self.size/2), 
