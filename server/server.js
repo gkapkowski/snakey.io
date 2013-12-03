@@ -39,8 +39,9 @@ var onSocketConnection = function (socket) {
     socket.on('add-snake', game.addSnake);
 }
 
+var port = process.env.PORT || 5000;
 app = http.createServer(handler);
-app.listen(process.argv[2] || 80);
+app.listen(port);
 
 io = socketio.listen(app);
 io.set('log level', 1);
