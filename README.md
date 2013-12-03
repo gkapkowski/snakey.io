@@ -36,8 +36,10 @@ TODO
 Example Snake servers
 =====================
 
+
 Django
 ------
+
 
 Note: It's recommended to run snake server in virtualenv
 
@@ -48,7 +50,6 @@ pip install requirements.txt
 ```
 
 Run snake server locally
-~~~~~~~~~~~~~~~~~~~~~~~~
 
 ```bash
 cd examples/django/
@@ -56,6 +57,5 @@ gunicorn example.wsgi:application
 ```
 
 Run snake server on heroku
-~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TODO
