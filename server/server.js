@@ -9,7 +9,7 @@ var app, game;
 var fileServer = new static.Server('./');
 
 game = new gameModule.Game({
-    speed: 10,
+    speed: 500,
     timeout: 100,
     apples: 200,
     size: 100
