@@ -1,60 +1,81 @@
-<html>
+<!doctype html>
+<html class="no-js" lang="en">
     <head>
-        <meta charset="UTF-8">
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="/client/jquery-2.0.3.min.js"></script>
-        <script src="/node_modules/underscore/underscore-min.js"></script>
-        <script src="/node_modules/backbone/backbone-min.js"></script>
-        <script src="/client/client.js"></script>
-        <style type="text/css">
-            .main {
-                width: 100%;
-            }
-
-            .board {
-                display: inline-block;
-            }
-
-            .board canvas {
-                border: 10px solid green;
-            }
-
-            .scores {  
-                width: 300px;
-                display: inline-block;
-            }
-
-            .management {  
-                width: 200px;
-                display: inline-block;
-            }
-        </style>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Snakey.io Game Platform</title>
+        <link rel="stylesheet" href="css/foundation.css" />
+        <script src="js/modernizr.js"></script>
     </head>
     <body>
-        <div class="main">
-            <div class="board">
-                <canvas id="myCanvas"></canvas> 
-            </div>
-            <div class="scores">
-                <ul></ul>
-            </div>
-            <div class="management">
-                <form action="/">
-                    <label for="name">Name</label>
-                    <input type="text" id="name" name="name"/>
-
-                    <label for="url">Url</label>
-                    <input type="text" id="url" name="url"/>
-
-                    <input type="submit" value="Add"/>
-                </form>
+        <div class="row">
+            <div class="large-12 columns">
+                <h1>Welcome to Snakey.io - Game platform</h1>
             </div>
         </div>
+        <div class="main row">
+            <div class="large-12 columns">
+                <div class="row">
+                    <div class="panel">
+                        <div class="row">
+                            <div class="board large-8 columns">
+                                <canvas id="myCanvas"></canvas> 
+                            </div>
+                            <div class="scores large-4 columns">
+                                <h5>Hall of Fame:</h5>
+                                <ul class="no-bullet"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="large-12 columns">
+                        <h5>Join the game!</h5>
+                        <div class="row">
+                            <div class="management large-6 columns">
+                                <form action="/">
+                                    <div class="row collapse">
+                                        <label for="name">Your Snake App Name</label>
+                                        <div class="large-9 columns">
+                                            <input type="text" id="name" name="name"/>
+                                        </div>
+                                        <div class="large-3 columns">
+                                            <span class="postfix">.herokuapp.com</span>
+                                        </div>
+                                    </div>
+                                    <input class="small button" type="submit" value="Add"/>
+                                </form>
+                            </div>
+                            <div class="large-6 columns">
+                                <div class="panel callout">
+                                    <p>
+                                        If you want to start playing snake game, 
+                                        run your snake server on heroku and add your snake
+                                        to the game.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="js/jquery.js"></script>
+        <script src="js/foundation.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/node_modules/underscore/underscore-min.js"></script>
+        <script src="/node_modules/backbone/backbone-min.js"></script>
+        <script src="client.js"></script>
         <script type="text/javascript">
+            $(document).foundation();
+
             var client = new Client({
                 el: $('.main'),
                 size: 10
             });
         </script>
+        <a href="https://github.com/gkapkowski/snakey.io">
+            <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_green_007200.png" alt="Fork me on GitHub">
+        </a>
     </body>
 </html>

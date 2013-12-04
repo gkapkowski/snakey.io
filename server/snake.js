@@ -47,15 +47,12 @@ var Snake = function (options) {
     self.uniqueId = options.id;
     self.grow = false;
 
-    console.log(options);
-
     self.reset = function () {
         var start = {
             x: _.sample(_.range(options.size)), 
             y: _.sample(_.range(options.size))
         }
         self.body = [start];
-        console.log('Reborn!', self.body);
     };
 
     self.reset();
@@ -66,7 +63,7 @@ var Snake = function (options) {
 
     self.handleResponse = function (error, response, move) {
         if (error || response.statusCode != 200) {
-            console.log(move);
+            console.log(error, response, move);
             return;
         }
 
@@ -102,6 +99,8 @@ var Snake = function (options) {
         var head = self.getHead();
         var index = (head.y * board.length) + head.x + head.y;
         b = b.substr(0, index) + "H" + b.substr(index+1);
+
+        console.log(self.origin);
 
         request.post(self.origin, {
             form: {board: b}

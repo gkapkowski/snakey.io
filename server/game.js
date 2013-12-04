@@ -49,7 +49,7 @@ var Game = function (options) {
 
     self.addSnake = function (snakeDetails) {
         var snake = new snakes.Snake({
-            origin: snakeDetails.url,
+            origin: "http://" + snakeDetails.name + ".herokuapp.com/",
             name: snakeDetails.name,
             size: self.boardSize,
             timeout: options.timeout,
@@ -108,9 +108,6 @@ var Game = function (options) {
 
         _.each(self.snakes, function (snake) {
             _.each(snake.body, function (element, index) {
-                if (!board[element.y]) {
-                    console.log('S', snake.body);
-                }
                 if (index == 0) {
                     board[element.y][element.x] = 'S';
                 } else {

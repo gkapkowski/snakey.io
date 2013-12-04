@@ -33,7 +33,7 @@ var Scores = Backbone.View.extend({
             return -item.length;
         });
 
-        self.$el.html('<ul></ul>');
+        self.$('ul').empty();
         _.each(scores, function (item) {
             self.$('ul').append('<li>' + item.length + ' ' + item.name + '</li>');
         });
@@ -60,6 +60,9 @@ var Board = Backbone.View.extend({
 
         this.canvas = this.$('canvas')[0];
         this.canvasContext = this.canvas.getContext("2d");
+
+        this.background = document.createElement('canvas');
+        this.backgroundContext = this.background.getContext('2d');
     },
 
     onConfig: function (config) {
@@ -70,6 +73,8 @@ var Board = Backbone.View.extend({
         this.$el.css('height', width + 20);
         this.canvas.width = width;
         this.canvas.height = height;
+        this.background.width = width;
+        this.background.height = height;
     },
 
     onBoard: function (board) {
@@ -82,12 +87,13 @@ var Board = Backbone.View.extend({
 
     updateScreen: function () {
         this.render();
+        this.canvasContext.drawImage(this.background, 0, 0);
         requestAnimationFrame(this.updateScreen);
     },
 
     render: function () {
-        this.canvasContext.fillStyle = this.colors.empty;
-        this.canvasContext.fillRect(0, 0, this.board.size * this.size, this.board.size * this.size);
+        this.backgroundContext.fillStyle = this.colors.empty;
+        this.backgroundContext.fillRect(0, 0, this.board.size * this.size, this.board.size * this.size);
 
         var snakes = this.board.state.snakes;
         var apples = this.board.state.apples;
@@ -97,18 +103,18 @@ var Board = Backbone.View.extend({
     },
 
     drawApples: function (apples) {
-        this.canvasContext.fillStyle = this.colors.apple;
+        this.backgroundContext.fillStyle = this.colors.apple;
         _.each(apples, this.drawApple);
     },  
 
     drawApple: function (coords) {
-        this.canvasContext.beginPath();
-        this.canvasContext.arc(
+        this.backgroundContext.beginPath();
+        this.backgroundContext.arc(
             coords.x * this.size + (this.size/2), 
             coords.y * this.size + (this.size/2), 
             this.size/2, 0, 2*Math.PI);
-        this.canvasContext.fill();
-        this.canvasContext.stroke();
+        this.backgroundContext.fill();
+        this.backgroundContext.stroke();
     },
 
     drawSnakes: function (snakes) {
@@ -117,17 +123,17 @@ var Board = Backbone.View.extend({
 
     drawSnake: function (snake) {
         var self = this;
-        self.canvasContext.fillStyle = self.colors.snakes[snake.uniqueId];;
+        self.backgroundContext.fillStyle = self.colors.snakes[snake.uniqueId];;
         _.each(snake.body, function (coords, index) {
-            self.canvasContext.beginPath();
-            self.canvasContext.arc(
+            self.backgroundContext.beginPath();
+            self.backgroundContext.arc(
                 coords.x * self.size + (self.size/2), 
                 coords.y * self.size + (self.size/2), 
                 self.size/2, 0, 2*Math.PI);
-            self.canvasContext.fill();
-            self.canvasContext.stroke();
+            self.backgroundContext.fill();
+            self.backgroundContext.stroke();
             if (index == 0) {
-                self.canvasContext.fillText(
+                self.backgroundContext.fillText(
                     snake.options.name, 
                     coords.x * self.size - 2, 
                     coords.y * self.size - 2);
@@ -149,10 +155,8 @@ var Management = Backbone.View.extend({
     addSnake: function (e) {
         e.preventDefault();
         var name = this.$('input[name="name"]').val();
-        var url = this.$('input[name="url"]').val();
         this.socket.emit('add-snake', {
-            name: name,
-            url: url
+            name: name
         });
     }
 });

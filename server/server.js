@@ -11,8 +11,8 @@ var fileServer = new static.Server('./');
 game = new gameModule.Game({
     speed: 500,
     timeout: 100,
-    apples: 200,
-    size: 100
+    apples: 20,
+    size: 60
 });
 
 //Start Game
