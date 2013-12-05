@@ -100,8 +100,6 @@ var Snake = function (options) {
         var index = (head.y * board.length) + head.x + head.y;
         b = b.substr(0, index) + "H" + b.substr(index+1);
 
-        console.log(self.origin);
-
         request.post(self.origin, {
             form: {board: b}
         }, function (error, response, move) {

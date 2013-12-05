@@ -19,33 +19,6 @@ var Game = function (options) {
     self.scores = {};
     self.snakes = [];
     self.newSnakes = [];
-    self.premanentSnakes = [
-        /*{name: 'A', url:'http://localhost:8000/main/'},
-        {name: 'B', url:'http://localhost:8000/main/'},
-        {name: 'C', url:'http://localhost:8000/main/'},
-        {name: 'D', url:'http://localhost:8000/main/'},
-        {name: 'E', url:'http://localhost:8000/main/'},
-        {name: 'F', url:'http://localhost:8000/main/'},
-        {name: 'G', url:'http://localhost:8000/main/'},
-        {name: 'H', url:'http://localhost:8000/main/'},
-        {name: 'I', url:'http://localhost:8000/main/'},
-        {name: 'J', url:'http://localhost:8000/main/'},
-        {name: 'K', url:'http://localhost:8000/main/'},
-        {name: 'L', url:'http://localhost:8000/main/'},
-        {name: 'M', url:'http://localhost:8000/main/'},
-        {name: 'N', url:'http://localhost:8000/main/'},
-        {name: 'O', url:'http://localhost:8000/main/'},
-        {name: 'P', url:'http://localhost:8000/main/'},
-        {name: 'Q', url:'http://localhost:8000/main/'},
-        {name: 'R', url:'http://localhost:8000/main/'},
-        {name: 'S', url:'http://localhost:8000/main/'},
-        {name: 'T', url:'http://localhost:8000/main/'},
-        {name: 'U', url:'http://localhost:8000/main/'},
-        {name: 'W', url:'http://localhost:8000/main/'},
-        {name: 'X', url:'http://localhost:8000/main/'},
-        {name: 'Y', url:'http://localhost:8000/main/'},
-        {name: 'Z', url:'http://localhost:8000/main/'}*/
-    ];
 
     self.addSnake = function (snakeDetails) {
         var snake = new snakes.Snake({
@@ -59,13 +32,14 @@ var Game = function (options) {
     };
 
     self.addNewSnakes = function () {
-        _.each(self.premanentSnakes, self.addSnake);
         self.snakes = _.union(self.snakes, self.newSnakes);
         self.newSnakes.length = 0;
     };
 
     self.init = function () {
         self.addNewSnakes();
+
+        //self.addSnake({name:'http://localhost:8000/'});
 
         self.apples = [];
         _.each(_.range(options.apples), function () {
