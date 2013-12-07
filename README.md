@@ -10,8 +10,8 @@ Snakey.io implementation files
 ### Running locally
 
 
-1. Download & install Node.js from http://nodejs.org/download/
-2. Download snakey.io code ([Download](https://github.com/gkapkowski/snakey.io/archive/master.zip)) or clone repozitory.
+1. Download & install [Node.js](http://nodejs.org/download/)
+2. [Download snakey.io code](https://github.com/gkapkowski/snakey.io/archive/master.zip) or clone repozitory.
 
     ```bash
     git clone git@github.com:gkapkowski/snakey.io.git
@@ -41,7 +41,25 @@ Snakey.io implementation files
 ### Running on Heroku
 
 
-TODO
+1. Download & install [Heroku Toolbelt](https://toolbelt.heroku.com/)
+2. Clone snakey.io repository
+
+    ```bash
+    git clone git@github.com:gkapkowski/snakey.io.git
+    cd snakey.io/
+    ```
+
+3. Create new heroku app with snakey.io (Heroku will automatically add new remote repo)
+
+    ```bash
+    heroku create
+    ```
+    
+4. Deploy your snakey.io instance
+
+    ```bash
+    git push heroku master
+    ```
 
 
 ## Player servers (snakes)
