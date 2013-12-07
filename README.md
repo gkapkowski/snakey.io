@@ -79,7 +79,7 @@ It's recommended to run snake server in virtual enviroment. Read more at http://
     gunicorn example.wsgi:application
     ```
     
-<!--
+<!---
 #### Node.js
 
 1. Download & install Node.js from http://nodejs.org/download/
