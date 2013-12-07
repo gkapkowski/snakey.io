@@ -1,61 +1,104 @@
-snakey.io
-=========
+# snakey.io
+
 
 Snakey.io implementation files
 
-Server
-======
 
-Running locally
----------------
+## Game Server
 
-Install requirements
 
-```
-npm install package.json
-```
+### Running locally
 
-Start server (default port: 8001)
 
-```
-npm start
-```
+1. Download & install Node.js from http://nodejs.org/download/
+2. Download snakey.io code ([Download](https://github.com/gkapkowski/snakey.io/archive/master.zip)) or clone repozitory.
 
-or
+    ```bash
+    git clone git@github.com:gkapkowski/snakey.io.git
+    cd snakey.io/
+    ```
 
-```
-node server/server.js [PORT]
-```
+3. Install dependencies
 
-Running on Heroku
------------------
+    ```bash
+    npm install package.json
+    ```
+
+
+4. Start server (default port: 5000)
+
+    ```bash
+    npm start
+    ```
+
+    or
+
+    ```bash
+    node server/server.js [PORT]
+    ```
+
+
+### Running on Heroku
+
 
 TODO
 
 
-Example Snake servers
-=====================
+## Player servers (snakes)
 
 
-Django
-------
+### Running Locally
 
 
-Note: It's recommended to run snake server in virtualenv
+1. Download snakey.io code ([Download](https://github.com/gkapkowski/snakey.io/archive/master.zip)) or clone repozitory.
 
-Install requirements:
+    ```bash
+    git clone git@github.com:gkapkowski/snakey.io.git
+    ```
 
-```bash
-pip install requirements.txt
-```
+#### Django
 
-Run snake server locally
 
-```bash
-cd examples/django/
-gunicorn example.wsgi:application
-```
+It's recommended to run snake server in virtual enviroment. Read more at http://www.virtualenv.org/en/latest/
 
-Run snake server on heroku
+1. go to example django snake dir
+
+    ```
+    cd snakey.io/examples/django
+    ```
+
+2. Install requirements:
+
+    ```bash
+    pip install requirements.txt
+    ```
+
+3. Run server (default port 8000)
+
+    ```bash
+    gunicorn example.wsgi:application
+    ```
+    
+<!--
+#### Node.js
+
+1. Download & install Node.js from http://nodejs.org/download/
+2. Install dependencies
+
+    ```bash
+    cd snakey.io
+    npm install package.json
+    ```
+    
+3. Run server (default port 5003)
+
+    ```bash
+    cd snakey.ioexamples/nodejs/
+    node snake.js
+    ```
+-->
+
+### Running on heroku
+
 
 TODO
