@@ -11,7 +11,7 @@ Snakey.io implementation files
 
 
 1. Download & install [Node.js](http://nodejs.org/download/)
-2. [Download snakey.io code](https://github.com/gkapkowski/snakey.io/archive/master.zip) or clone repozitory.
+2. [Download snakey.io code](https://github.com/gkapkowski/snakey.io/archive/master.zip) or clone repository.
 
     ```bash
     git clone git@github.com:gkapkowski/snakey.io.git
@@ -68,7 +68,7 @@ Snakey.io implementation files
 ### Running Locally
 
 
-1. Download snakey.io code ([Download](https://github.com/gkapkowski/snakey.io/archive/master.zip)) or clone repozitory.
+1. Download snakey.io code ([Download](https://github.com/gkapkowski/snakey.io/archive/master.zip)) or clone repository.
 
     ```bash
     git clone git@github.com:gkapkowski/snakey.io.git
@@ -97,24 +97,23 @@ It's recommended to run snake server in virtual enviroment. Read more at http://
     gunicorn example.wsgi:application
     ```
     
-<!---
+
 #### Node.js
 
 1. Download & install Node.js from http://nodejs.org/download/
 2. Install dependencies
 
     ```bash
-    cd snakey.io
+    cd snakey.io/examples/node/
     npm install package.json
     ```
     
-3. Run server (default port 5003)
+3. Run server (default port 8001)
 
     ```bash
-    cd snakey.ioexamples/nodejs/
+    cd snakey.io/examples/node/
     node snake.js
     ```
--->
 
 ### Running on heroku
 

@@ -1,11 +1,11 @@
 {
-  "name": "snakey.io-game-server",
+  "name": "snakey.io-player-server-snake",
   "preferGlobal": false,
   "version": "0.1.0",
   "author": "Grzegorz Kapkowski <contact@snakey.io>",
-  "description": "Snake game server",
+  "description": "Snake player server",
   "scripts": {
-    "start": "node server/server.js"
+    "start": "node snake.js"
   },
   "repository": {
     "type": "git",
@@ -17,11 +17,6 @@
     "server"
   ],
   "dependencies" : {
-    "async"   :  "*",
-    "backbone" :  "*",
-    "node-static" :  "*",
-    "request"    :  "*",
-    "socket.io" :  "*",
     "underscore"   :  "*"
   },
   "analyze": true,
