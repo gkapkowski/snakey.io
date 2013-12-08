@@ -1,4 +1,4 @@
-var snakes = require('./snake.js');
+var snakeModule = require('./snake.js');
 var _ = require('underscore');
 var async = require('async');
 
@@ -9,78 +9,90 @@ Point:
 
 */
 
+var BaseGame = {
+    //Clients
+    clients: [],
 
-var Game = function (options) {
-    var self = this;
-    self.FPS = 30;
-    self.options = options;
-    self.boardSize = options.size;
-    self.sockets = [];
-    self.scores = {};
-    self.snakes = [];
-    self.newSnakes = [];
+    //Board
+    scores: {},
+    apples: [],
+    snakes: [],
+    newSnakes: [],
 
-    self.addSnake = function (snakeDetails) {
-        var snake = new snakes.Snake({
-            origin: "http://" + snakeDetails.name + ".herokuapp.com/",
+    //Animation
+    FPS: 30,
+    lastFrame: new Date()*1,
+
+
+    init: function (options) {
+        _(this).bindAll(
+            'start', 
+            'addApple',
+            'addApples',
+            'addSnake',
+            'updateScore',
+            'validateSnake',
+            'updateAllSnakes',
+            'allSnakesUpdated');
+        
+        this.options = options;
+        this.boardSize = options.size;
+
+        this.addNewSnakes();
+        this.addApples();
+    },
+
+    addApples: function () {
+        _.each(_.range(this.options.apples), this.addApple);
+    },
+
+    addApple: function () {
+        this.apples.push({
+            x: _.sample(_.range(this.boardSize)),
+            y: _.sample(_.range(this.boardSize))
+        });
+    },
+
+    addNewSnakes: function () {
+        this.snakes = _.union(this.snakes, this.newSnakes);
+        this.newSnakes.length = 0;
+    },
+
+    addSnake: function (snakeDetails) {
+        var snake = new snakeModule.Snake({
+            origin: this.getSnakeOrigin(snakeDetails),
             name: snakeDetails.name,
-            size: self.boardSize,
-            timeout: options.timeout,
+            size: this.boardSize,
+            timeout: this.options.timeout,
             id: _.sample(_.range(100))
         });
-        self.newSnakes.push(snake);
-    };
+        this.newSnakes.push(snake);
+    },
 
-    self.addNewSnakes = function () {
-        self.snakes = _.union(self.snakes, self.newSnakes);
-        self.newSnakes.length = 0;
-    };
+    updateAllScores: function () {
+        _.each(this.snakes, this.updateScore);
+    },
 
-    self.init = function () {
-        self.addNewSnakes();
+    updateScore: function (snake) {
+        var maxScore = this.scores[snake.name];
+        var newScore = Math.max(snake.body.length, maxScore || 1);
+        this.scores[snake.name] = newScore;
+    },
 
-        //self.addSnake({name:'http://localhost:8000/'});
-
-        self.apples = [];
-        _.each(_.range(options.apples), function () {
-            self.apples.push({
-                x: _.sample(_.range(self.boardSize)),
-                y: _.sample(_.range(self.boardSize))
-            });
-        });
-
-        self.lastFrame = new Date()*1;
-    };
-
-    self.updateScores = function () {
-        var self = this;
-        var snakes = self.snakes;
-        _.each(snakes, function (snake) {
-            var length;
-            if (_.isUndefined(self.scores[snake.name])) {
-                length = 1;
-            } else {
-                length = Math.max(snake.body.length, self.scores[snake.name]); 
-            }
-            self.scores[snake.name] = length;
-        });
-    };
-
-    self.createBoard = function () {
+    createBoard: function () {
         //Create board for all snakes to move upon
+        var boardSize = this.boardSize;
         var board = [];
-        _.each(_.range(self.boardSize), function (y) {
+        _.each(_.range(boardSize), function (y) {
             board[y] = [];
-            _.each(_.range(self.boardSize), function (x) {
+            _.each(_.range(boardSize), function (x) {
                 board[y][x] = '.';
             });
         });
-
-        _.each(self.apples, function (element, index) {
+        _.each(this.apples, function (element, index) {
             board[element.y][element.x] = 'o';
         });
-
-        _.each(self.snakes, function (snake) {
+        _.each(this.snakes, function (snake) {
             _.each(snake.body, function (element, index) {
                 if (index == 0) {
                     board[element.y][element.x] = 'S';
@@ -90,89 +102,85 @@ var Game = function (options) {
             });
         });
         return board;
-    };
+    },
 
-    self.validateSnake = function (snake) {
-        if (!self.isOnBoard(snake) || self.hasColided(snake)) {
+    validateSnake: function (snake) {
+        if (!this.isOnBoard(snake) || this.hasColided(snake)) {
             snake.reset();
         }
 
         //refactor!!
-        var appleToEat = _.findWhere(self.apples, snake.getHead());
+        var appleToEat = _.findWhere(this.apples, snake.getHead());
         if (!!appleToEat) {
             snake.grow = true;
             // Remove apple that was eaten
-            self.apples = _.filter(self.apples, function (item) {
+            this.apples = _.filter(this.apples, function (item) {
                 return !_.isEqual(appleToEat, item);
             });
-            self.apples.push({
-                x: _.sample(_.range(self.boardSize)),
-                y: _.sample(_.range(self.boardSize))
-            });
+            this.addApple();
         }
-    };
+    },
 
-    self.emitFrame = function () {
-        var boardState = self.getBoardState();
+    emitFrame: function () {
+        var boardState = this.getBoardState();
+        var boardSize = this.boardSize;
+        var scores = this.scores;
 
-        _.each(self.sockets, function (socket) {
+        _.each(this.clients, function (socket) {
             socket.emit('board', {
-                size: self.boardSize, 
+                size: boardSize, 
                 state: boardState
             });
-            socket.emit('scores', self.scores);
+            socket.emit('scores', scores);
         });
-    };
+    },
 
-    self.allSnakesUpdated = function (err) {
+    allSnakesUpdated: function (err) {
         //check if any snake dies or have eaten apple
-        _.each(self.snakes, self.validateSnake);
+        _.each(this.snakes, this.validateSnake);
 
-        self.updateScores();
+        this.updateAllScores();
 
         var now = new Date()*1;
-        if (now - self.lastFrame > (1000/self.FPS)) {
-
-            self.emitFrame();
-            
-            self.lastFrame = now;
+        if (now - this.lastFrame > (1000/this.FPS)) {
+            this.emitFrame();
+            this.lastFrame = now;
         }
-        setTimeout(function () {
-            //Wont this lead to huge memory leak?
-            self.updateAllSnakes(); 
-        }, self.options.speed);
-    };
+
+        setTimeout(this.updateAllSnakes, this.options.speed);
+    },
 
     //Call all snakes and update board state
-    self.updateAllSnakes = function () {
-        self.snakes = _.union(self.snakes, self.newSnakes);
-        self.newSnakes.length = 0;
+    updateAllSnakes: function () {
+        this.snakes = _.union(this.snakes, this.newSnakes);
+        this.newSnakes.length = 0;
 
-        var board = self.createBoard();
+        var board = this.createBoard();
 
         //move ALL snakes
-        async.each(self.snakes, function (snake, callWhenFinished) {
+        async.each(this.snakes, function (snake, callWhenFinished) {
+
             snake.move(board, callWhenFinished);
-        }, self.allSnakesUpdated);
-    };
+        }, this.allSnakesUpdated);
+    },
 
-    self.getBoardState = function () {
+    getBoardState: function () {
         return {
-            snakes: self.snakes,
-            apples: self.apples
+            snakes: this.snakes,
+            apples: this.apples
         }
-    };
+    },
 
-    self.isOnBoard = function (snake) {
+    isOnBoard: function (snake) {
         var head = snake.getHead();
         return (head.x >= 0) && 
         (head.y >= 0) && 
-        (head.x <= self.boardSize - 1) && 
-        (head.y <= self.boardSize - 1);
-    };
+        (head.x <= this.boardSize - 1) && 
+        (head.y <= this.boardSize - 1);
+    },
 
-    self.hasColided = function (snake) {
-        var snakes = _.map(self.snakes, function (other) {
+    hasColided: function (snake) {
+        var snakes = _.map(this.snakes, function (other) {
             if (other.uniqueId != snake.uniqueId) {
                 //Other snake
                 return other.body;
@@ -184,22 +192,50 @@ var Game = function (options) {
         return _.any(snakes, function (otherBody) {
             return !!_.where(otherBody, snake.getHead()).length;
         });
-    }
+    },
 
-    self.registerViewer = function (socket) {
-        self.sockets.push(socket);
-    };
+    registerViewer: function (socket) {
+        this.clients.push(socket);
+        socket.on('add-snake', this.addSnake);
+    },
 
-    self.start = function () {
-        self.addNewSnakes();
-        if (!_.isEmpty(self.snakes)){
-            self.updateAllSnakes();
+    start: function () {
+        this.addNewSnakes();
+        if (!_.isEmpty(this.snakes)){
+            this.updateAllSnakes();
         } else {
-            setTimeout(self.start, 1000);
+            setTimeout(this.start, 1000);
         }
-    };
-
-    self.init();
+    }
 };
 
-exports.Game = Game
+
+var Game = function (options) {
+    this.init.apply(this, arguments);
+};
+
+_.extend(Game.prototype, BaseGame, {
+    name: 'Game',
+
+    getSnakeOrigin: function (snakeDetails) {
+        return snakeDetails.url;
+    }
+
+});
+
+var HerokuGame = function (options) {
+    this.init.apply(this, arguments);
+};
+
+_.extend(HerokuGame.prototype, BaseGame, {
+    name: 'HerokuGame',
+
+    getSnakeOrigin: function (snakeDetails) {
+        return "http://" + snakeDetails.name + ".herokuapp.com/";
+    }
+
+});
+
+
+exports.Game = Game;
+exports.HerokuGame = HerokuGame;

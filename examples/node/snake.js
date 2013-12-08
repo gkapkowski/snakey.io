@@ -33,7 +33,8 @@ _.extend(Snake.prototype, {
     },
 
     getBoard: function (content) {
-        return querystring.parse(this.content).board.split('\n');
+        var content = querystring.parse(this.content);
+        return content.board.split('\n');
     },
 
     getRandomMove: function () {
@@ -46,8 +47,9 @@ _.extend(Snake.prototype, {
     }
 });
 
+var handler = function (request, response) {
+    var snake = new Snake();
+    snake.handleRequest(request, response);
+}
 
-var snake = new Snake();
-
-
-http.createServer(snake.handleRequest).listen(process.env.PORT || 8001);
+http.createServer(handler).listen(process.env.PORT || 8001);

@@ -31,36 +31,63 @@
                 <div class="row">
                     <div class="large-12 columns">
                         <h5>Join the game!</h5>
-                        <div class="row">
-                            <div class="management large-6 columns">
-                                <form action="/">
-                                    <div class="row collapse">
-                                        <label for="name">Your Snake App Name</label>
-                                        <div class="large-9 columns">
-                                            <input type="text" id="name" name="name"/>
-                                        </div>
-                                        <div class="large-3 columns">
-                                            <span class="postfix">.herokuapp.com</span>
-                                        </div>
-                                    </div>
-                                    <input class="small button" type="submit" value="Add"/>
-                                </form>
-                            </div>
-                            <div class="large-6 columns">
-                                <div class="panel callout">
-                                    <p>
-                                        If you want to start playing snake game, 
-                                        run your snake server on heroku and add your snake
-                                        to the game.<br/>
-                                        Try: murmuring-headland-4457 for example snake.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="management row"></div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div id="game-management" class="hide">
+            <div class="large-12 columns">
+                <form action="/">
+                    <div class="row collapse">
+                        <div class="large-1 columns">
+                            <span class="prefix">Name:</span>
+                        </div>  
+                        <div class="large-3 columns">    
+                            <input type="text" id="name" name="name"/>
+                        </div>
+                        <div class="large-1 columns">
+                            <span class="prefix">URL:</span>
+                        </div>    
+                        <div class="large-5 columns">    
+                            <input type="text" id="url" name="url"/>
+                        </div>
+                        <div class="large-2 columns">
+                            <input class="small postfix button" type="submit" value="Add"/>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="game-management-heroku" class="hide">
+            <div class="large-6 columns">
+                <form action="/">
+                    <div class="row collapse">
+                        <label for="name">Your Snake App Name</label>
+                        <div class="large-9 columns">
+                            <input type="text" id="name" name="name"/>
+                        </div>
+                        <div class="large-3 columns">
+                            <span class="postfix">.herokuapp.com</span>
+                        </div>
+                    </div>
+                    <input class="small button" type="submit" value="Add"/>
+                </form>
+            </div>
+            <div class="large-6 columns">
+                <div class="panel callout">
+                    <p>
+                        If you want to start playing snake game, 
+                        run your snake server on heroku and add your snake
+                        to the game.<br/>
+                        Try: murmuring-headland-4457 for example snake.
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <script src="/client/js/jquery.js"></script>
         <script src="/client/js/foundation.min.js"></script>
         <script src="/socket.io/socket.io.js"></script>

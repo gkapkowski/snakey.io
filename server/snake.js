@@ -63,7 +63,7 @@ var Snake = function (options) {
 
     self.handleResponse = function (error, response, move) {
         if (error || response.statusCode != 200) {
-            console.log(error, response, move);
+            console.log('Error', error, response, move);
             return;
         }
 
@@ -101,7 +101,8 @@ var Snake = function (options) {
         b = b.substr(0, index) + "H" + b.substr(index+1);
 
         request.post(self.origin, {
-            form: {board: b}
+            form: {board: b},
+            timeout: self.options.timeout
         }, function (error, response, move) {
             self.handleResponse(error, response, move);
             callWhenFinished(); // async thing

@@ -143,6 +143,15 @@ var Board = Backbone.View.extend({
 });
 
 var Management = Backbone.View.extend({
+    templates: {
+        Game: _.template($('#game-management').html()),
+        HerokuGame: _.template($('#game-management-heroku').html()),
+    },
+
+    addHandlers: {
+        Game: 'addSnakeGame',
+        HerokuGame: 'addSnakeHerokuGame',
+    },
 
     events: {
         'submit form': 'addSnake'
@@ -150,14 +159,38 @@ var Management = Backbone.View.extend({
 
     initialize: function (options) {
         this.socket = options.socket;
+        _(this).bindAll('onConfig');
     },
 
     addSnake: function (e) {
         e.preventDefault();
+        var data = this[this.addHandlers[this.type]]();
+        this.socket.emit('add-snake', data);
+    },
+
+    addSnakeGame: function (e) {
         var name = this.$('input[name="name"]').val();
-        this.socket.emit('add-snake', {
-            name: name
-        });
+        var url = this.$('input[name="url"]').val();
+        return {
+            name: name,
+            url: url
+        };
+    },
+
+    addSnakeHerokuGame: function (e) {
+        var name = this.$('input[name="name"]').val();
+        return {name: name};
+    },
+
+    onConfig: function (config) {
+        this.type = config.type;
+        this.render();
+    },
+
+    render: function () {
+        this.$el.html(this.templates[this.type]({
+            //pass
+        }));
     }
 });
 
@@ -185,5 +218,6 @@ var Client = Backbone.View.extend({
             el: this.$('.management'),
             socket: this.socket
         });
+        this.socket.on('config', this.management.onConfig);
     }
 });
