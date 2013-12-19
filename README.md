@@ -101,17 +101,27 @@ It's recommended to run snake server in virtual enviroment. Read more at http://
 #### Node.js
 
 1. Download & install Node.js from http://nodejs.org/download/
-2. Install dependencies
+2. Go to example snake dir
 
     ```bash
     cd snakey.io/examples/node/
-    npm install package.json
+    ```
+
+3. Install dependencies
+
+    ```bash
+    npm install
     ```
     
-3. Run server (default port 8001)
+4. Run server (default port 8001)
 
     ```bash
-    cd snakey.io/examples/node/
+    npm start
+    ```
+    
+    or
+    
+    ```bash
     node snake.js
     ```
 
