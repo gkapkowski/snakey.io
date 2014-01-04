@@ -1,7 +1,7 @@
 var request = require('request'); 
 var _ = require('underscore');
 
-var possibleMoves = ['up', 'down', 'left', 'right']
+var commonMoves = ['up', 'down', 'left', 'right'];
 var moves = {
     up: {
         x: 0, 
@@ -19,7 +19,7 @@ var moves = {
         x: 1, 
         y: 0
     },
-}
+};
 
 /*
          up 0, 1
@@ -31,83 +31,117 @@ var moves = {
         down 0, -1
 */
 
+
 var movePoint = function (point, direction) {
     return {
         x: point.x + moves[direction].x,
         y: point.y + moves[direction].y
-    }
-}
+    };
+};
 
-var Snake = function (options) {
-    var self = this;
-    self.options = options;
-    self.currentMove = null;
-    self.origin = options.origin;
-    self.name = options.name;
-    self.uniqueId = options.id;
-    self.grow = false;
 
-    self.reset = function () {
+var Player = function (options) {
+    this.init.apply(this, arguments);
+};
+
+
+_.extend(Player.prototype, {
+    body: [],
+    possibleMoves: [], //redefine in subclass
+
+    init: function (options) {
+        this.options = options;
+        this.origin = options.origin;
+        this.name = options.name;
+        this.uniqueId = options.id;
+    },
+
+    reset: function () {
         var start = {
-            x: _.sample(_.range(options.size)), 
-            y: _.sample(_.range(options.size))
-        }
-        self.body = [start];
-    };
+            x: _.sample(_.range(this.options.size)), 
+            y: _.sample(_.range(this.options.size))
+        };
+        this.body = [start];
+    },
 
-    self.reset();
+    getHead: function () {
+        return this.body[0];
+    },
 
-    self.getHead = function () {
-        return self.body[0];
-    };
-
-    self.handleResponse = function (error, response, move) {
+    handleResponse: function (error, response, move) {
         if (error || response.statusCode != 200) {
-            console.log('Error', error, response, move);
+            console.log('Error', error, this.origin);
             return;
         }
 
-        if(!_.contains(possibleMoves, move)){
-            self.reset();
+        if(!_.contains(this.possibleMoves, move)){
+            this.reset();
             return;
         }
 
-        self.handleMove(move);
-    };
+        this.handleMove(move);
+    },
 
-    self.handleMove = function (move) {
-        self.currentMove = move;
-        //calculate new head
-        var newHead = movePoint(self.getHead(), move);
-        //Put new head if front of snake body
-        self.body.unshift(newHead);
-
-        if (!self.grow) {
-            // if no apple eaten, remove last element
-            self.body.pop();
-        } else {
-            // if apple eaten, leave last element
-            self.grow = false;
-        }
-    };
-
-    self.move = function (board, callWhenFinished) {
+    move: function (board, callWhenFinished) {
         var b = (_.map(board, function (row) {
             return row.join('');
         })).join('\n');
 
-        var head = self.getHead();
+        var head = this.getHead();
+        //replace # with H for player head
         var index = (head.y * board.length) + head.x + head.y;
         b = b.substr(0, index) + "H" + b.substr(index+1);
 
-        request.post(self.origin, {
+        var self = this;
+
+        request.post(this.origin, {
             form: {board: b},
-            timeout: self.options.timeout
+            timeout: this.options.timeout
         }, function (error, response, move) {
             self.handleResponse(error, response, move);
             callWhenFinished(); // async thing
         });
-    };
-}
+    },
+
+    handleMove: function (move) {
+        //implement in subclass
+    }
+});
+
+
+var Snake = function (options) {
+    this.init.apply(this, arguments);
+};
+
+_.extend(Snake.prototype, Player.prototype, {
+    grow: false,
+    currentMove: null,
+    possibleMoves: commonMoves.slice(0),
+
+    init: function (options) {
+        Player.prototype.init.apply(this, arguments);
+        this.reset();
+    },
+
+    handleMove: function (move) {
+        this.currentMove = move;
+        //calculate new head
+        var newHead = movePoint(this.getHead(), move);
+        //Put new head if front of snake body
+        this.body.unshift(newHead);
+
+        if (!this.grow) {
+            // if no apple eaten, remove last element
+            this.body.pop();
+        } else {
+            // if apple eaten, leave last element
+            this.grow = false;
+        }
+    },
+
+    score: function () {
+        return this.body.length;
+    }
+});
 
 exports.Snake = Snake;

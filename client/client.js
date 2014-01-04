@@ -26,7 +26,7 @@ var Scores = Backbone.View.extend({
             return {
                 name: key,
                 length: value
-            }
+            };
         });
         
         scores = _.sortBy(scores, function (item) {
@@ -44,7 +44,7 @@ var Scores = Backbone.View.extend({
 var Board = Backbone.View.extend({
     isFree: true,
     colors: {
-        snakes: _.map(_.range(100), function () {
+        players: _.map(_.range(100), function () {
             return getRandomColor();
         }),
         apple: '#ff0000',
@@ -95,11 +95,11 @@ var Board = Backbone.View.extend({
         this.backgroundContext.fillStyle = this.colors.empty;
         this.backgroundContext.fillRect(0, 0, this.board.size * this.size, this.board.size * this.size);
 
-        var snakes = this.board.state.snakes;
+        var players = this.board.state.players;
         var apples = this.board.state.apples;
 
         this.drawApples(apples);
-        this.drawSnakes(snakes);
+        this.drawSnakes(players);
     },
 
     drawApples: function (apples) {
@@ -117,13 +117,13 @@ var Board = Backbone.View.extend({
         this.backgroundContext.stroke();
     },
 
-    drawSnakes: function (snakes) {
-        _.each(snakes, this.drawSnake);
+    drawSnakes: function (players) {
+        _.each(players, this.drawSnake);
     },
 
     drawSnake: function (snake) {
         var self = this;
-        self.backgroundContext.fillStyle = self.colors.snakes[snake.uniqueId];;
+        self.backgroundContext.fillStyle = self.colors.players[snake.uniqueId];
         _.each(snake.body, function (coords, index) {
             self.backgroundContext.beginPath();
             self.backgroundContext.arc(
@@ -132,7 +132,7 @@ var Board = Backbone.View.extend({
                 self.size/2, 0, 2*Math.PI);
             self.backgroundContext.fill();
             self.backgroundContext.stroke();
-            if (index == 0) {
+            if (index === 0) {
                 self.backgroundContext.fillText(
                     snake.options.name, 
                     coords.x * self.size - 2, 
@@ -165,7 +165,7 @@ var Management = Backbone.View.extend({
     addSnake: function (e) {
         e.preventDefault();
         var data = this[this.addHandlers[this.type]]();
-        this.socket.emit('add-snake', data);
+        this.socket.emit('add-player', data);
     },
 
     addSnakeGame: function (e) {
