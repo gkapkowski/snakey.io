@@ -23,8 +23,8 @@ def get_possible_moves(head, snakes, n, w, h, faster=False):
             if n == 0:
                 yield name, current_y, current_x
             else:
-                moves = get_possible_moves((current_y, current_x), 
-                                           snakes + [('#', current_y, current_x)], 
+                moves = get_possible_moves((current_y, current_x),
+                                           snakes + [('#', current_y, current_x)],
                                            n-1,
                                            w,
                                            h)
@@ -74,15 +74,22 @@ def move(board):
 
     if apples:
         apple = get_nearest_apple(head, apples)
-        move =  get_best_move(apple, moves)
+        move = get_best_move(apple, moves)
     else:
         move = random.choice([move for move, _, _ in moves])
 
     return move
 
-def main_view(request):
+
+def main_snake_view(request):
     board = request.POST['board'].split('\n')
     return HttpResponse(move(board))
 
-def random_view(request):
+
+def random_snake_view(request):
     return HttpResponse(random.choice([i for i in DIRECTIONS.keys()]))
+
+
+def random_tank_view(request):
+    move = random.choice(['right', 'left', 'forward', 'backward', 'fire'])
+    return HttpResponse(move)

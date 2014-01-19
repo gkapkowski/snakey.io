@@ -19,7 +19,7 @@
                     <div class="panel">
                         <div class="row">
                             <div class="board large-8 columns">
-                                <canvas id="myCanvas"></canvas> 
+                                <canvas id="myCanvas" width="600" height="600"></canvas> 
                             </div>
                             <div class="scores large-4 columns">
                                 <h5>Hall of Fame:</h5>
@@ -98,8 +98,7 @@
             $(document).foundation();
 
             var client = new Client({
-                el: $('.main'),
-                size: 10
+                el: $('.main')
             });
         </script>
         <script>

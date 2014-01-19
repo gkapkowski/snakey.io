@@ -1,19 +1,20 @@
 var static = require('node-static');
 var http = require('http'); 
-var snakesModule = require('./snake.js');
-var gameModule = require('./game.js');
+var gameModule = require('./games.js');
 var socketio = require('socket.io');
 var _ = require('underscore');
 
+
+var isHeroku = !!process.env.DYNO;
 
 var Server = function (options) {
     this.init.apply(this, arguments);
 };
 
 _.extend(Server.prototype, {
-    games: {
-        snakes: process.env.DYNO ? gameModule.HerokuGame : gameModule.Game,
-        tanks: null
+    gameObjects: {
+        snakes: isHeroku ? gameModule.HerokuSnakeGame : gameModule.SnakeGame,
+        tanks: isHeroku ? gameModule.HerokuTankGame : gameModule.TankGame
     },
 
     gameOptions: {
@@ -21,10 +22,16 @@ _.extend(Server.prototype, {
             speed: 500,
             timeout: 1000,
             apples: 20,
-            size: 60
+            size: 50
         },
-        tanks: null
+        tanks: {
+            speed: 500,
+            timeout: 1000,
+            size: 20
+        },
     },
+
+    games: [],
 
     defaultPort: 5000,
 
@@ -32,7 +39,7 @@ _.extend(Server.prototype, {
 
     init: function (options) {
         _(this).bindAll('onSocketConnection', 'handler');
-        this.game = new this.games[options.name](this.gameOptions[options.name]);
+        this.game = new this.gameObjects[options.name](this.gameOptions[options.name]);
         this.game.start();
 
         var port = process.env.PORT || this.defaultPort;
@@ -69,5 +76,5 @@ _.extend(Server.prototype, {
 
 //Run server
 new Server({
-    name: 'snakes'
+    name: process.argv[2]
 });

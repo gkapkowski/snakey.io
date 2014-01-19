@@ -1,4 +1,4 @@
-var snakeModule = require('./snake.js');
+var playersModule = require('./players.js');
 var _ = require('underscore');
 var async = require('async');
 
@@ -130,8 +130,8 @@ _.extend(SynchronousGame.prototype, {
         //NOTE: implement in subclass
     },
 
-
     emitFrame: function () {
+        console.log('Emit');
         var boardState = this.getBoardState();
         var boardSize = this.boardSize;
         var scores = this.scores;
@@ -146,7 +146,11 @@ _.extend(SynchronousGame.prototype, {
     },
 
     getBoardState: function () {
-        //NOTE: implement in subclass
+        return {players: this.players};
+    },
+
+    getPlayerOrigin: function (details) {
+        return details.url;
     },
 
     registerViewer: function (socket) {
@@ -166,13 +170,13 @@ _.extend(SynchronousGame.prototype, {
 
 
 
-var Game = function (options) {
+var SnakeGame = function (options) {
     this.init.apply(this, arguments);
 };
 
 
-_.extend(Game.prototype, SynchronousGame.prototype, {
-    name: 'Game',
+_.extend(SnakeGame.prototype, SynchronousGame.prototype, {
+    name: 'SnakeGame',
     apples: [],
 
     init: function (options) {
@@ -197,8 +201,8 @@ _.extend(Game.prototype, SynchronousGame.prototype, {
     },
 
     createPlayer: function (details) {
-        return new snakeModule.Snake({
-            origin: this.getSnakeOrigin(details),
+        return new playersModule.Snake({
+            origin: this.getPlayerOrigin(details),
             name: details.name,
             size: this.boardSize,
             timeout: this.options.timeout,
@@ -219,8 +223,8 @@ _.extend(Game.prototype, SynchronousGame.prototype, {
         _.each(this.apples, function (element, index) {
             board[element.y][element.x] = 'o';
         });
-        _.each(this.players, function (snake) {
-            _.each(snake.body, function (element, index) {
+        _.each(this.players, function (player) {
+            _.each(player.body, function (element, index) {
                 if (index === 0) {
                     board[element.y][element.x] = 'S';
                 } else {
@@ -253,29 +257,83 @@ _.extend(Game.prototype, SynchronousGame.prototype, {
             players: this.players,
             apples: this.apples
         };
-    },
-
-    getSnakeOrigin: function (snakeDetails) {
-        return snakeDetails.url;
     }
 });
 
 
 
-var HerokuGame = function (options) {
+var HerokuSnakeGame = function (options) {
     this.init.apply(this, arguments);
 };
 
 
-_.extend(HerokuGame.prototype, Game.prototype, {
-    name: 'HerokuGame',
+_.extend(HerokuSnakeGame.prototype, SnakeGame.prototype, {
+    name: 'HerokuSnakeGame',
 
-    getSnakeOrigin: function (snakeDetails) {
-        return "http://" + snakeDetails.name + ".herokuapp.com/";
+    getPlayerOrigin: function (details) {
+        return "http://" + details.name + ".herokuapp.com/";
     }
 
 });
 
 
-exports.Game = Game;
-exports.HerokuGame = HerokuGame;
+
+var TankGame = function (options) {
+    this.init.apply(this, arguments);
+};
+
+
+_.extend(TankGame.prototype, SynchronousGame.prototype, {
+    name: 'TankGame',
+
+    createPlayer: function (details) {
+        return new playersModule.Tank({
+            origin: this.getPlayerOrigin(details),
+            name: details.name,
+            size: this.boardSize,
+            timeout: this.options.timeout,
+            id: _.sample(_.range(100))
+        });
+    },
+
+    createBoard: function () {
+        //Create board for all players to move upon
+        var boardSize = this.boardSize;
+        var board = [];
+        
+        _.each(_.range(boardSize), function (y) {
+            board[y] = [];
+            _.each(_.range(boardSize), function (x) {
+                board[y][x] = '.';
+            });
+        });
+
+        _.each(this.players, function (player) {
+            _.each(player.body, function (element) {
+                board[element.y][element.x] = '#';
+            });
+        });
+        return board;
+    }
+});
+
+
+var HerokuTankGame = function (options) {
+    this.init.apply(this, arguments);
+};
+
+
+_.extend(HerokuTankGame.prototype, TankGame.prototype, {
+    name: 'HerokuGame',
+
+    getPlayerOrigin: function (details) {
+        return "http://" + details.name + ".herokuapp.com/";
+    }
+
+});
+
+
+exports.SnakeGame = SnakeGame;
+exports.HerokuSnakeGame = HerokuSnakeGame;
+exports.TankGame = TankGame;
+exports.HerokuTankGame = HerokuTankGame;

@@ -47,34 +47,25 @@ var Board = Backbone.View.extend({
         players: _.map(_.range(100), function () {
             return getRandomColor();
         }),
-        apple: '#ff0000',
         empty: '#ffffff'
     },
 
     initialize: function (options) {
         _(this).bindAll(
-            'onConfig', 'onBoard',
-            'drawApple', 'drawSnake',
+            'onConfig', 'onBoard', 'drawPlayer',
             'render', 'updateScreen');
-        this.size = options.size;
-
+ 
         this.canvas = this.$('canvas')[0];
         this.canvasContext = this.canvas.getContext("2d");
 
         this.background = document.createElement('canvas');
+        this.background.width = this.canvas.width;
+        this.background.height = this.canvas.height;
         this.backgroundContext = this.background.getContext('2d');
     },
 
     onConfig: function (config) {
-        var width = config.size * this.size;
-        var height = config.size * this.size;
-
-        this.$el.css('width', width + 20);
-        this.$el.css('height', width + 20);
-        this.canvas.width = width;
-        this.canvas.height = height;
-        this.background.width = width;
-        this.background.height = height;
+        this.size = parseInt(this.canvas.width/config.size);  // set size of one `building block` of board
     },
 
     onBoard: function (board) {
@@ -95,41 +86,59 @@ var Board = Backbone.View.extend({
         this.backgroundContext.fillStyle = this.colors.empty;
         this.backgroundContext.fillRect(0, 0, this.board.size * this.size, this.board.size * this.size);
 
-        var players = this.board.state.players;
-        var apples = this.board.state.apples;
-
-        this.drawApples(apples);
-        this.drawSnakes(players);
+        this.drawPlayers();
+        this.drawOthers();
     },
 
-    drawApples: function (apples) {
+    drawPlayers: function () {
+        _.each(this.board.state.players, this.drawPlayer);
+    },
+
+    drawPlayer: function (player) {
+        //Implement in subclass
+    },
+
+    drawOthers: function () {
+        //Implement in subclass
+    }
+});
+
+var SnakeBoard = Board.extend({
+
+    initialize: function () {
+        Board.prototype.initialize.apply(this, arguments);
+        _(this).bindAll('drawApple');
+        this.colors.apple = '#ff0000';
+    },
+
+    drawOthers : function () {
+        this.drawApples();
+    },
+
+    drawApples: function () {
         this.backgroundContext.fillStyle = this.colors.apple;
-        _.each(apples, this.drawApple);
+        _.each(this.board.state.apples, this.drawApple);
     },  
 
     drawApple: function (coords) {
         this.backgroundContext.beginPath();
         this.backgroundContext.arc(
-            coords.x * this.size + (this.size/2), 
-            coords.y * this.size + (this.size/2), 
-            this.size/2, 0, 2*Math.PI);
+            coords.x * this.size + parseInt(this.size/2), 
+            coords.y * this.size + parseInt(this.size/2), 
+            parseInt(this.size/2), 0, 2*Math.PI);
         this.backgroundContext.fill();
         this.backgroundContext.stroke();
     },
 
-    drawSnakes: function (players) {
-        _.each(players, this.drawSnake);
-    },
-
-    drawSnake: function (snake) {
+    drawPlayer: function (snake) {
         var self = this;
         self.backgroundContext.fillStyle = self.colors.players[snake.uniqueId];
         _.each(snake.body, function (coords, index) {
             self.backgroundContext.beginPath();
             self.backgroundContext.arc(
-                coords.x * self.size + (self.size/2), 
-                coords.y * self.size + (self.size/2), 
-                self.size/2, 0, 2*Math.PI);
+                coords.x * self.size + parseInt(self.size/2), 
+                coords.y * self.size + parseInt(self.size/2), 
+                parseInt(self.size/2), 0, 2*Math.PI);
             self.backgroundContext.fill();
             self.backgroundContext.stroke();
             if (index === 0) {
@@ -142,19 +151,99 @@ var Board = Backbone.View.extend({
     }
 });
 
+TankBoard = Board.extend({
+
+    drawPlayer: function (tank) {
+        var self = this;
+        var border = parseInt(1 * self.size/2 / 5);
+        var playerSize = parseInt(4 * self.size/2 / 5);
+        var coords = tank.body[0];
+        var rotations = {
+            right: 0,
+            down: 90 * Math.PI/180,
+            left: 180 * Math.PI/180,
+            up: 270 * Math.PI/180,
+        };
+
+        self.backgroundContext.save();
+        self.backgroundContext.fillStyle = self.colors.players[tank.uniqueId];
+        //Set 0,0 of canvas to current player position
+        self.backgroundContext.translate(
+            coords.x * self.size + parseInt(self.size/2),
+            coords.y * self.size + parseInt(self.size/2)
+        );
+
+        self.backgroundContext.fillRect(
+            -playerSize,
+            -playerSize,
+            2*playerSize,
+            2*playerSize
+        );
+
+        self.backgroundContext.fillText(
+            tank.options.name, 
+            - (playerSize + border), 
+            - (playerSize + border)
+        );
+
+        self.backgroundContext.rotate(rotations[tank.facing]);
+
+        //Canon
+        self.backgroundContext.beginPath();
+        self.backgroundContext.lineWidth = parseInt(self.size / 5);
+        self.backgroundContext.moveTo(-border, 0);
+        self.backgroundContext.lineTo(
+            playerSize + border,
+            0
+        );
+        self.backgroundContext.strokeStyle="green";
+        self.backgroundContext.stroke(); 
+
+        //Tracks
+        self.backgroundContext.beginPath();
+        self.backgroundContext.lineWidth = parseInt(self.size / 5);
+
+        self.backgroundContext.moveTo(
+            - (playerSize + border), 
+            - (playerSize)
+        );
+        self.backgroundContext.lineTo(
+            + (playerSize + border),
+            - (playerSize)
+        );
+        
+        self.backgroundContext.moveTo(
+            - (playerSize + border), 
+            + (playerSize)
+        );
+        self.backgroundContext.lineTo(
+            + (playerSize + border),
+            + (playerSize)
+        );
+        
+        self.backgroundContext.strokeStyle="black";
+        self.backgroundContext.stroke(); 
+
+        self.backgroundContext.restore();
+    }
+
+});
+
 var Management = Backbone.View.extend({
     templates: {
-        Game: _.template($('#game-management').html()),
-        HerokuGame: _.template($('#game-management-heroku').html()),
+        SnakeGame: _.template($('#game-management').html()),
+        HerokuSnakeGame: _.template($('#game-management-heroku').html()),
+        TankGame: _.template($('#game-management').html()),
     },
 
     addHandlers: {
-        Game: 'addSnakeGame',
-        HerokuGame: 'addSnakeHerokuGame',
+        SnakeGame: 'addPlayer',
+        HerokuSnakeGame: 'addHerokuPlayer',
+        TankGame: 'addPlayer',
     },
 
     events: {
-        'submit form': 'addSnake'
+        'submit form': 'submit'
     },
 
     initialize: function (options) {
@@ -162,13 +251,13 @@ var Management = Backbone.View.extend({
         _(this).bindAll('onConfig');
     },
 
-    addSnake: function (e) {
+    submit: function (e) {
         e.preventDefault();
         var data = this[this.addHandlers[this.type]]();
         this.socket.emit('add-player', data);
     },
 
-    addSnakeGame: function (e) {
+    addPlayer: function (e) {
         var name = this.$('input[name="name"]').val();
         var url = this.$('input[name="url"]').val();
         return {
@@ -177,7 +266,7 @@ var Management = Backbone.View.extend({
         };
     },
 
-    addSnakeHerokuGame: function (e) {
+    addHerokuPlayer: function (e) {
         var name = this.$('input[name="name"]').val();
         return {name: name};
     },
@@ -188,9 +277,7 @@ var Management = Backbone.View.extend({
     },
 
     render: function () {
-        this.$el.html(this.templates[this.type]({
-            //pass
-        }));
+        this.$el.html(this.templates[this.type]());
     }
 });
 
@@ -200,9 +287,8 @@ var Client = Backbone.View.extend({
         this.socket = io.connect(); //connect to source domain
         
         //Board
-        this.board = new Board({
-            el: this.$('.board'),
-            size: options.size
+        this.board = new SnakeBoard({
+            el: this.$('.board')
         });
         this.socket.on('config', this.board.onConfig);
         this.socket.on('board', this.board.onBoard);

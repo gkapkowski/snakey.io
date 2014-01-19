@@ -54,6 +54,7 @@ _.extend(Player.prototype, {
         this.origin = options.origin;
         this.name = options.name;
         this.uniqueId = options.id;
+        this.reset();
     },
 
     reset: function () {
@@ -115,16 +116,9 @@ var Snake = function (options) {
 
 _.extend(Snake.prototype, Player.prototype, {
     grow: false,
-    currentMove: null,
     possibleMoves: commonMoves.slice(0),
 
-    init: function (options) {
-        Player.prototype.init.apply(this, arguments);
-        this.reset();
-    },
-
     handleMove: function (move) {
-        this.currentMove = move;
         //calculate new head
         var newHead = movePoint(this.getHead(), move);
         //Put new head if front of snake body
@@ -144,4 +138,43 @@ _.extend(Snake.prototype, Player.prototype, {
     }
 });
 
+
+
+var Tank = function (options) {
+    this.init.apply(this, arguments);
+};
+
+
+_.extend(Tank.prototype, Player.prototype, {
+    possibleMoves: ['right', 'left', 'forward', 'backward', 'fire'],
+
+    facing: 'up',
+    directions: ['up', 'right', 'down', 'left'],
+    kills: 0, 
+
+    handleMove: function (move) {
+        var index;
+        var head = this.getHead();
+        if (move == 'forward') {
+            this.body = [movePoint(head, this.facing)];
+        } else if (move == 'backward') {
+            index = (this.directions.indexOf(this.facing) + 2) % this.directions.length;
+            move = this.directions[index];
+            this.body = [movePoint(head, move)];
+        } else if (move == 'right') {
+            index = (this.directions.indexOf(this.facing) + 1) % this.directions.length;
+            this.facing = this.directions[index];
+        } else if (move == 'left') {
+            index = (this.directions.indexOf(this.facing) + 3) % this.directions.length;
+            this.facing = this.directions[index];
+        }
+    },
+
+    score: function () {
+        return  this.kills;
+    }
+});
+
+
 exports.Snake = Snake;
+exports.Tank = Tank;
