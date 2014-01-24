@@ -128,4 +128,4 @@ It's recommended to run snake server in virtual enviroment. Read more at http://
 ### Running on heroku
 
 
-TODO
+TODO: update
