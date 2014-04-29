@@ -15,30 +15,77 @@
         </div>
         <div class="main row">
             <div class="large-12 columns">
-                <div class="row">
-                    <div class="panel">
-                        <div class="row">
-                            <div class="board large-8 columns">
-                                <canvas id="myCanvas" width="600" height="600"></canvas> 
-                            </div>
-                            <div class="scores large-4 columns">
-                                <h5>Hall of Fame:</h5>
-                                <ul class="no-bullet"></ul>
-                            </div>
-                        </div>
-                    </div>
+                <div class="games row"></div>
+                <div class="row panel">
+                    <div class="board large-8 columns"></div>
+                    <div class="scores large-4 columns"></div>
                 </div>
-                <div class="row">
-                    <div class="large-12 columns">
-                        <h5>Join the game!</h5>
-                        <div class="management row"></div>
-                    </div>
-                </div>
+                <div class="management row"></div>
             </div>
         </div>
 
-        <div id="game-management" class="hide">
-            <div class="large-12 columns">
+        <!-- TEMPLATES -->
+        <script type="text/underscore-template" id="games">
+            <div class="text-left">
+                <div class="row collapse">
+                    <h3>Create new game</h3>
+                    <div class="large-2 columns">
+                        <span class="prefix">Board name:</span>
+                    </div>
+                    <div class="large-6 columns">
+                        <input type="text" name="name"/>
+                    </div>
+                    <div class="large-2 columns">
+                        <a href="#" class="button postfix new-game">Snakes</a>
+                    </div>
+                    <div class="large-2 columns">
+                        <a href="#" class="button postfix new-game">Tanks</a>
+                    </div>
+                </div>
+                <div class="row collapse">
+                    <h3>Join existing game</h3>
+                    <ul class="large-block-grid-6">
+                        <% 
+                            var keys = _.sortBy(_.keys(games), function (key) { 
+                                return key.toLowerCase(); 
+                            });
+                            _.each(keys, function (name) {
+                                var game = games[name];
+                        %>
+                            <li>
+                                <a class="button <% if (name === current) { %> success <% } %> join-game" 
+                                   data-name="<%= name %>"
+                                   href="#">
+                                    <strong><%= name %></strong></br>
+                                    Size: <%= game.boardSize %></br>
+                                    Players: <%= game.players.length %>
+                                </a>
+                            </li>
+                        <% }); %>
+                    </ul>
+                </div>
+            </div>
+        </script>
+
+        <script type="text/underscore-template" id="board">
+            <div class="text-left">   
+                <h3><%= name %></h3>
+                <canvas id="myCanvas" width="600" height="600"></canvas> 
+            </div>
+        </script>
+
+        <script type="text/underscore-template" id="scores">
+            <h5>Hall of Fame:</h5>
+            <ul class="no-bullet">
+                <% _.each(scores, function (score) { %> 
+                    <li><%= score.length %> - <%= score.name %></li>
+                <% }); %>
+            </ul>
+        </script>
+
+        <script type="text/underscore-template" id="game-management">
+            <div class="text-left">
+                <h3>Add your player!</h3>
                 <form action="/">
                     <div class="row collapse">
                         <div class="large-1 columns">
@@ -59,34 +106,38 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </script>
 
-        <div id="game-management-heroku" class="hide">
-            <div class="large-6 columns">
-                <form action="/">
-                    <div class="row collapse">
-                        <label for="name">Your Snake App Name</label>
-                        <div class="large-9 columns">
-                            <input type="text" id="name" name="name"/>
+        <script type="text/underscore-template" id="game-management-heroku">
+            <div class="text-left">
+                <h3>Add your player!</h3>
+                <div class="large-6 columns">
+                    <form action="/">
+                        <div class="row collapse">
+                            <label for="name">Your Snake App Name</label>
+                            <div class="large-9 columns">
+                                <input type="text" id="name" name="name"/>
+                            </div>
+                            <div class="large-3 columns">
+                                <span class="postfix">.herokuapp.com</span>
+                            </div>
                         </div>
-                        <div class="large-3 columns">
-                            <span class="postfix">.herokuapp.com</span>
-                        </div>
+                        <input class="small button" type="submit" value="Add"/>
+                    </form>
+                </div>
+                <div class="large-6 columns">
+                    <div class="panel callout">
+                        <p>
+                            If you want to start playing snake game, 
+                            run your snake server on heroku and add your snake
+                            to the game.<br/>
+                            Try: murmuring-headland-4457 for example snake.
+                        </p>
                     </div>
-                    <input class="small button" type="submit" value="Add"/>
-                </form>
-            </div>
-            <div class="large-6 columns">
-                <div class="panel callout">
-                    <p>
-                        If you want to start playing snake game, 
-                        run your snake server on heroku and add your snake
-                        to the game.<br/>
-                        Try: murmuring-headland-4457 for example snake.
-                    </p>
                 </div>
             </div>
-        </div>
+        </script>
+        <!-- END TEMPLATES -->
 
         <script src="/client/js/jquery.js"></script>
         <script src="/client/js/foundation.min.js"></script>
@@ -94,11 +145,13 @@
         <script src="/node_modules/underscore/underscore-min.js"></script>
         <script src="/node_modules/backbone/backbone-min.js"></script>
         <script src="/client/client.js"></script>
+
         <script type="text/javascript">
             $(document).foundation();
 
             var client = new Client({
-                el: $('.main')
+                el: $('.main'),
+                model: new ClientState()
             });
         </script>
         <script>

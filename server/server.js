@@ -31,23 +31,21 @@ _.extend(Server.prototype, {
         },
     },
 
-    games: [],
+    games: {},
 
     defaultPort: 5000,
 
     fileServer: new static.Server('./'),
 
     init: function (options) {
-        _(this).bindAll('onSocketConnection', 'handler');
-        this.game = new this.gameObjects[options.name](this.gameOptions[options.name]);
-        this.game.start();
-
+        _(this).bindAll('onSocketConnection', 'addPlayer', 'handler');
+    
         var port = process.env.PORT || this.defaultPort;
         var app = http.createServer(this.handler);
         app.listen(port);
 
         io = socketio.listen(app);
-        io.set('log level', 1);
+        io.set('log level', 3);
         io.sockets.on('connection', this.onSocketConnection);
     },
 
@@ -64,17 +62,45 @@ _.extend(Server.prototype, {
     },
 
     onSocketConnection: function (socket) {
-        socket.emit('config', {
-            size: this.game.options.size,
-            type: this.game.name 
+        var self = this;
+        socket.on('add-player', function (data) {
+            self.addPlayer(socket, data);
         });
+        socket.on('go-to-game', function (data) {
+            self.goToGame(socket, data);
+        });
+        socket.emit('games', this.games);
+    },
+
+    addPlayer: function (socket, data) {
+        this.games[data.game].addPlayer(data);
+        //Update UI games list
+        socket.emit('games', this.games);
+    },
+
+    goToGame: function (socket, data) {
+        //Get or Create Game
+        var game = this.games[data.name] || new this.gameObjects[data.type](this.gameOptions[data.type]);
         
-        this.game.registerViewer(socket);
+        //Start Game
+        game.start();
+
+        //Add game to games list
+        this.games[data.name] = game;
+
+        //Remove socket from viewers, one socket can view only one game at a time.
+        _.invoke(this.games, 'unregisterViewer', socket);
+
+        //Register socket as viewer
+        game.registerViewer(socket);
+
+        //Update UI games list
+        socket.emit('games', this.games);
     }
 });
 
 
 //Run server
-new Server({
+var server = new Server({
     name: process.argv[2]
 });

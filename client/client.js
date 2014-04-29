@@ -8,8 +8,12 @@ function getRandomColor() {
     return color;
 }
 
+// MODELS
+var ClientState = Backbone.Model.extend();
+
+
 var Scores = Backbone.View.extend({
-    
+    template: _.template($('#scores').html()),
 
     initialize: function (options) {
         _(this).bindAll('onScores');
@@ -33,15 +37,13 @@ var Scores = Backbone.View.extend({
             return -item.length;
         });
 
-        self.$('ul').empty();
-        _.each(scores, function (item) {
-            self.$('ul').append('<li>' + item.length + ' ' + item.name + '</li>');
-        });
+        this.$el.html(this.template({scores: scores}));
     }
 
 });
 
 var Board = Backbone.View.extend({
+    template: _.template($('#board').html()),
     isFree: true,
     colors: {
         players: _.map(_.range(100), function () {
@@ -53,15 +55,8 @@ var Board = Backbone.View.extend({
     initialize: function (options) {
         _(this).bindAll(
             'onConfig', 'onBoard', 'drawPlayer',
-            'render', 'updateScreen');
- 
-        this.canvas = this.$('canvas')[0];
-        this.canvasContext = this.canvas.getContext("2d");
-
-        this.background = document.createElement('canvas');
-        this.background.width = this.canvas.width;
-        this.background.height = this.canvas.height;
-        this.backgroundContext = this.background.getContext('2d');
+            'fillCanvas', 'updateScreen');
+        this.listenTo(this.model, 'change:name', this.render);
     },
 
     onConfig: function (config) {
@@ -77,12 +72,12 @@ var Board = Backbone.View.extend({
     },
 
     updateScreen: function () {
-        this.render();
+        this.fillCanvas();
         this.canvasContext.drawImage(this.background, 0, 0);
         requestAnimationFrame(this.updateScreen);
     },
 
-    render: function () {
+    fillCanvas: function () {
         this.backgroundContext.fillStyle = this.colors.empty;
         this.backgroundContext.fillRect(0, 0, this.board.size * this.size, this.board.size * this.size);
 
@@ -100,6 +95,17 @@ var Board = Backbone.View.extend({
 
     drawOthers: function () {
         //Implement in subclass
+    },
+
+    render: function () {
+        this.$el.html(this.template({name: this.model.get('name')}));
+        this.canvas = this.$('canvas')[0];
+        this.canvasContext = this.canvas.getContext("2d");
+
+        this.background = document.createElement('canvas');
+        this.background.width = this.canvas.width;
+        this.background.height = this.canvas.height;
+        this.backgroundContext = this.background.getContext('2d');
     }
 });
 
@@ -236,7 +242,7 @@ var Management = Backbone.View.extend({
         TankGame: _.template($('#game-management').html()),
     },
 
-    addHandlers: {
+    handlers: {
         SnakeGame: 'addPlayer',
         HerokuSnakeGame: 'addHerokuPlayer',
         TankGame: 'addPlayer',
@@ -253,31 +259,84 @@ var Management = Backbone.View.extend({
 
     submit: function (e) {
         e.preventDefault();
-        var data = this[this.addHandlers[this.type]]();
+        var handlerName = this.handlers[this.model.get('type')];
+        var data = this[handlerName]();
         this.socket.emit('add-player', data);
     },
 
-    addPlayer: function (e) {
+    addPlayer: function () {
         var name = this.$('input[name="name"]').val();
         var url = this.$('input[name="url"]').val();
         return {
+            game: this.model.get('name'),
             name: name,
             url: url
         };
     },
 
-    addHerokuPlayer: function (e) {
+    addHerokuPlayer: function () {
         var name = this.$('input[name="name"]').val();
-        return {name: name};
+        return {
+            game: this.model.get('name'),
+            name: name
+        };
     },
 
     onConfig: function (config) {
-        this.type = config.type;
+        this.model.set({
+            type: config.type
+        });
+        this.render();
+    },
+
+    getTemplete: function () {
+        return this.templates[this.model.get('type')];
+    },
+
+    render: function () {
+        var template = this.getTemplete();
+        this.$el.html(template());
+    }
+});
+
+var Games = Backbone.View.extend({
+    template: _.template($('#games').html()),
+
+    events: {
+        'click a.new-game': 'newGame',
+        'click a.join-game': 'joinGame'
+    },
+
+    initialize: function (options) {
+        _(this).bindAll('setGames');
+        this.socket = options.socket;
+    },
+
+    newGame: function (e) {
+        e.preventDefault();
+        this.goToGame(this.$('input[name="name"]').val());
+    },
+
+    joinGame: function (e) {
+        e.preventDefault();
+        this.goToGame($(e.currentTarget).data('name'));
+    },
+
+    goToGame: function (name) {
+        this.model.set({name: name});
+        this.socket.emit('go-to-game', {
+            name: name,
+            type: 'snakes'
+        });
+    },
+
+    setGames: function (games) {
+        this.games = games;
         this.render();
     },
 
     render: function () {
-        this.$el.html(this.templates[this.type]());
+        this.$el.html(this.template({games: this.games, current: this.model.get('name')}));
     }
 });
 
@@ -286,9 +345,18 @@ var Client = Backbone.View.extend({
     initialize: function (options) {
         this.socket = io.connect(); //connect to source domain
         
+        //Games
+        this.games = new Games({
+            el: this.$('.games'),
+            socket: this.socket,
+            model: this.model
+        });
+        this.socket.on('games', this.games.setGames);
+
         //Board
         this.board = new SnakeBoard({
-            el: this.$('.board')
+            el: this.$('.board'),
+            model: this.model
         });
         this.socket.on('config', this.board.onConfig);
         this.socket.on('board', this.board.onBoard);
@@ -296,13 +364,15 @@ var Client = Backbone.View.extend({
         //Scores
         this.scores = new Scores({
             el: this.$('.scores'),
+            model: this.model
         });
         this.socket.on('scores', this.scores.onScores);
 
         //Management
         this.management = new Management({
             el: this.$('.management'),
-            socket: this.socket
+            socket: this.socket,
+            model: this.model
         });
         this.socket.on('config', this.management.onConfig);
     }

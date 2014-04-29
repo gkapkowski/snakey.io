@@ -16,19 +16,11 @@ var SynchronousGame = function (options) {
 
 
 _.extend(SynchronousGame.prototype, {
-    //Clients
-    clients: [],
-
-    //Score Board
-    scores: {},
-
     //Animation
     FPS: 30,
     lastFrame: new Date()*1,
-
-    //players
-    players: [],
-    newPlayers: [],
+    
+    started: false,
 
     init: function (options) {
         _(this).bindAll(
@@ -41,8 +33,21 @@ _.extend(SynchronousGame.prototype, {
         
         this.options = options;
         this.boardSize = options.size;
+        //Clients
+        this.clients = [];
+        //Score Board
+        this.scores = {};
+        //Players
+        this.players = [];
+        this.newPlayers = [];
+    },
 
-        this.addNewPlayers();
+    toJSON: function () {
+        return {
+            players: this.players,
+            options: this.options,
+            boardSize: this.boardSize,
+        };
     },
 
     addNewPlayers: function () {
@@ -131,7 +136,6 @@ _.extend(SynchronousGame.prototype, {
     },
 
     emitFrame: function () {
-        console.log('Emit');
         var boardState = this.getBoardState();
         var boardSize = this.boardSize;
         var scores = this.scores;
@@ -155,15 +159,22 @@ _.extend(SynchronousGame.prototype, {
 
     registerViewer: function (socket) {
         this.clients.push(socket);
-        socket.on('add-player', this.addPlayer);
+        socket.emit('config', {
+            size: this.options.size,
+            type: this.name 
+        });
+    },
+
+    unregisterViewer: function (socket) {
+        this.clients = _.filter(this.clients, function (item) {
+            return item !== socket;
+        });
     },
 
     start: function () {
-        this.addNewPlayers();
-        if (!_.isEmpty(this.players)){
+        if (!this.started) { 
             this.updateAllPlayers();
-        } else {
-            setTimeout(this.start, 1000);
+            this.started = true;
         }
     }
 });
@@ -177,20 +188,20 @@ var SnakeGame = function (options) {
 
 _.extend(SnakeGame.prototype, SynchronousGame.prototype, {
     name: 'SnakeGame',
-    apples: [],
-
+    
     init: function (options) {
         SynchronousGame.prototype.init.apply(this, arguments);
         _(this).bindAll(
             'addApple',
             'addApples',
             'eatApple');
-        
+
+        this.apples = [];
         this.addApples();
     },
 
     addApples: function () {
-        _.each(_.range(this.options.apples), this.addApple);
+        _.times(this.options.apples, this.addApple);
     },
 
     addApple: function () {
@@ -214,9 +225,9 @@ _.extend(SnakeGame.prototype, SynchronousGame.prototype, {
         //Create board for all players to move upon
         var boardSize = this.boardSize;
         var board = [];
-        _.each(_.range(boardSize), function (y) {
+        _.times(boardSize, function (y) {
             board[y] = [];
-            _.each(_.range(boardSize), function (x) {
+            _.times(boardSize, function (x) {
                 board[y][x] = '.';
             });
         });
@@ -301,9 +312,9 @@ _.extend(TankGame.prototype, SynchronousGame.prototype, {
         var boardSize = this.boardSize;
         var board = [];
         
-        _.each(_.range(boardSize), function (y) {
+        _.times(boardSize, function (y) {
             board[y] = [];
-            _.each(_.range(boardSize), function (x) {
+            _.times(boardSize, function (x) {
                 board[y][x] = '.';
             });
         });
