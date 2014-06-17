@@ -24,8 +24,13 @@ Snakey.io implementation files
     npm install package.json
     ```
 
+4. Build Package
 
-4. Start server (default port: 5000)
+    ```bash
+    gulp
+    ```
+
+5. Start server (default port: 5000)
 
     ```bash
     npm start
@@ -34,11 +39,11 @@ Snakey.io implementation files
     or
 
     ```bash
-    node server/server.js [PORT]
+    node dist/server/server.js [PORT]
     ```
 
 
-### Running on Heroku
+<!-- ### Running on Heroku
 
 
 1. Download & install [Heroku Toolbelt](https://toolbelt.heroku.com/)
@@ -60,9 +65,9 @@ Snakey.io implementation files
     ```bash
     git push heroku master
     ```
+ -->
 
-
-## Player servers (snakes)
+## Players
 
 
 ### Running Locally
@@ -124,8 +129,3 @@ It's recommended to run snake server in virtual enviroment. Read more at http://
     ```bash
     node snake.js
     ```
-
-### Running on heroku
-
-
-TODO: update

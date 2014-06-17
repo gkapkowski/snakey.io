@@ -1,32 +1,49 @@
 {
+  "analyze": true,
+  "author": "Grzegorz Kapkowski <contact@snakey.io>",
+  "dependencies": {
+    "async": "*",
+    "backbone": "*",
+    "foundation": "*",
+    "jquery": "*",
+    "node-static": "*",
+    "request": "*",
+    "socket.io": "*",
+    "socket.io-client": "*",
+    "underscore": "*"
+  },
+  "devDependencies": {
+    "browserify": "^4.1.10",
+    "glob": "^4.0.2",
+    "gulp": "*",
+    "gulp-clean": "^0.3.0",
+    "gulp-jshint": "*",
+    "gulp-notify": "*",
+    "gulp-watch": "^0.6.6",
+    "handlebars": "^1.3.0",
+    "hbsfy": "^1.3.2",
+    "jshint-stylish": "^0.2.0",
+    "run-sequence": "^0.3.6",
+    "vinyl-source-stream": "^0.1.1"
+  },
+  "description": "Snake game server",
+  "engines": {
+    "node": ">=0.10"
+  },
+  "keywords": [
+    "game",
+    "server",
+    "snake"
+  ],
+  "license": "MIT",
   "name": "snakey.io-game-server",
   "preferGlobal": false,
-  "version": "0.1.0",
-  "author": "Grzegorz Kapkowski <contact@snakey.io>",
-  "description": "Snake game server",
-  "scripts": {
-    "start": "node server/server.js snakes"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/gkapkowski/snakey.io.git"
   },
-  "keywords": [
-    "snake",
-    "game",
-    "server"
-  ],
-  "dependencies" : {
-    "async"   :  "*",
-    "backbone" :  "*",
-    "node-static" :  "*",
-    "request"    :  "*",
-    "socket.io" :  "*",
-    "underscore"   :  "*"
+  "scripts": {
+    "start": "node server/server.js snakes"
   },
-  "analyze": true,
-  "license": "MIT",
-  "engines": {
-    "node": ">=0.6"
-  }
+  "version": "1.0.0"
 }

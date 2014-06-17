@@ -1,0 +1,22 @@
+<h3>Create new game</h3>
+<span class="prefix">Board name:</span>
+<input type="text" name="name"/>
+<a href="#" class="button postfix new-game">Snakes</a>
+<a href="#" class="button postfix new-game">Tanks</a>
+
+<br/>
+
+<h3>Join existing game</h3>
+<ul class="large-block-grid-6">
+    {{#each games}}
+        <li>
+            <a class="button join-game" 
+               data-name="{{ @key }}"
+               href="#">
+                <strong>{{ @key }}</strong></br>
+                Size: {{ this.boardSize }}</br>
+                Players: {{ this.players.length }}
+            </a>
+        </li>
+    {{/each}}
+</ul>
