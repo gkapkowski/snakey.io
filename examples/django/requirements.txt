@@ -1,4 +1,0 @@
-Django==1.6
-argparse==1.2.1
-gunicorn==18.0
-wsgiref==0.1.2
