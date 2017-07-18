@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snakes</title>
+    <style type="text/css">
+      canvas { border: 1px solid black; }
+    </style>
+</head>
+<body>  
+    <canvas id="board" width="300" height="300"></canvas>
+    <script type="text/javascript">
+        var canvas = document.getElementById('board');
+        var ctx = canvas.getContext('2d');
+        
+        var board = [
+            ".....",
+            "..#H.",
+            ".o#..",
+            "..#..",
+            "....o",
+        ];
+
+        const scale = 300/5;
+
+        for (let y = 0; y < board.length; y++) {
+            let row = board[y];
+            for (let x = 0; x < row.length; x++) {
+                let field = row[x];
+                console.log(field);
+                switch (field) {
+                    case ".":
+                        ctx.fillStyle = 'rgb(255, 255, 255)';
+                        ctx.fillRect(x * scale, y * scale, scale, scale);
+                        break;
+                    case "#":
+                        ctx.fillStyle = 'rgb(120, 120, 120)';
+                        ctx.beginPath();
+                        ctx.arc(x * scale + parseInt(scale/2), y * scale + parseInt(scale/2), scale/2, 0, Math.PI*2);
+                        ctx.fill();
+                        break;
+                    case "H":
+                        ctx.fillStyle = 'rgb(0, 0, 0)';
+                        ctx.beginPath();
+                        ctx.arc(x * scale + parseInt(scale/2), y * scale + parseInt(scale/2), scale/2, 0, Math.PI*2);
+                        ctx.fill();
+                        break;
+                    case "o":
+                        ctx.fillStyle = 'rgb(200, 0, 0)';
+                        ctx.beginPath();
+                        ctx.arc(x * scale + parseInt(scale/2), y * scale + parseInt(scale/2), scale/2, 0, Math.PI*2);
+                        ctx.fill();
+                        break;
+                }
+                
+            }
+        }
+
+    </script>
+</body>
+</html>
