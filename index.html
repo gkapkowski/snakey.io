@@ -32,7 +32,7 @@
             moveSnakes(snakes);
             generateBoard(snakes, apples);
             loop();
-          }, 2000);
+          }, 500);
         })();
 
         function generateBoard(snakes, apples) {
@@ -129,7 +129,32 @@
                 newHeadY = y;
                 break;
             }
+
+
+            /*
+            remove last pair of coordinates, and add new ones as a new snake's head if move is possible
+            */
             snake.pop();
+            /*
+            is move possible? - collision check with board edges
+            */
+            if (newHeadX < 0 || newHeadX >= boardSize || newHeadY < 0 || newHeadY >= boardSize) {
+              console.log('not on board');
+              snake.length = 0;
+              return;
+            }
+            /*
+            is move possible? - collision check with itself
+            */
+            // for (var of itter) {
+            //
+            // }
+            /*
+            is move possible? - collision check with other snakes
+            */
+            // for (var of itter) {
+            //
+            // }
             snake.unshift([newHeadX, newHeadY]);
           }
 
