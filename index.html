@@ -137,7 +137,7 @@
               /*
               remove last pair of coordinates, and add new ones as a new snake's head if move is possible
               */
-              snake.pop();
+              var tail = snake.pop();
               /*
               is move possible? - collision check with board edges
               */
@@ -148,8 +148,7 @@
                 validMove = false;  
               }
               /*
-              is move possible? - collision check with itself
-              is move possible? - collision check with other snakes
+              is move possible? - collision check with itself and other snakes
               */
               for (let snake of snakes) {
                 for (let [x, y] of snake) {
@@ -163,6 +162,18 @@
               if (validMove) {
                 // add new head
                 snake.unshift([newHeadX, newHeadY]);  
+
+                for (let i = 0; i < apples.length; i++) {
+                  let x = apples[i][0];
+                  let y = apples[i][1];
+
+                   if (newHeadX === x && newHeadY === y) {
+                    snake.push(tail);
+                    apples.splice(i, 1);
+                    console.log('snake ate apple');
+                    break;
+                  }
+                }
               } else {
                 /* snake dies here */
                 snake.length = 0;
